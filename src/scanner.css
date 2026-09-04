@@ -1,0 +1,36 @@
+.scanner {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.scanner .camera {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  background: #000;
+}
+
+.scanner video {
+  display: block;
+  width: 100%;
+  max-height: 55vh;
+  object-fit: cover;
+}
+
+.scanner .camera span {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  padding: 8px;
+  border-radius: 999px;
+  background: #090a18cc;
+  color: white;
+  text-align: center;
+}
+
+.scanner small {
+  color: #fda4af;
+}

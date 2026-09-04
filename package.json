@@ -11,16 +11,17 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "jsqr": "^1.4.0",
+    "qrcode": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "qrcode": "latest"
+    "vite": "latest"
   },
   "devDependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
     "@types/node": "latest",
     "@types/qrcode": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
     "typescript": "latest"
   }
 }
