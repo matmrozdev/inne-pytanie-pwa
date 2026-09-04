@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+words-source.json
+public/words-source.json
+work/

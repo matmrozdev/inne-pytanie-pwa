@@ -1,0 +1,24 @@
+export type WireMessage={type:string;[key:string]:unknown};
+const config:RTCConfiguration={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
+const waitForIce=(pc:RTCPeerConnection)=>new Promise<void>(resolve=>{if(pc.iceGatheringState==='complete')return resolve();const done=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',done);resolve()}};pc.addEventListener('icegatheringstatechange',done);setTimeout(resolve,5000)});
+export const pack=(value:RTCSessionDescriptionInit)=>JSON.stringify(value);
+export const unpack=(value:string)=>JSON.parse(value.trim()) as RTCSessionDescriptionInit;
+
+export class HostNetwork{
+  peers=new Map<string,{pc:RTCPeerConnection;channel:RTCDataChannel}>();
+  constructor(private onMessage:(peerId:string,message:WireMessage)=>void,private onStatus:(peerId:string,connected:boolean)=>void){}
+  async createOffer(){const peerId=crypto.randomUUID();const pc=new RTCPeerConnection(config);const channel=pc.createDataChannel('game',{ordered:true});this.bind(peerId,pc,channel);await pc.setLocalDescription(await pc.createOffer());await waitForIce(pc);this.peers.set(peerId,{pc,channel});return{peerId,offer:pack(pc.localDescription!)}}
+  async acceptAnswer(peerId:string,answer:string){const peer=this.peers.get(peerId);if(!peer)throw new Error('Nie znaleziono zaproszenia.');await peer.pc.setRemoteDescription(unpack(answer))}
+  bind(peerId:string,pc:RTCPeerConnection,channel:RTCDataChannel){channel.onopen=()=>this.onStatus(peerId,true);channel.onclose=()=>this.onStatus(peerId,false);channel.onmessage=event=>{try{this.onMessage(peerId,JSON.parse(event.data) as WireMessage)}catch{}}}
+  send(peerId:string,message:WireMessage){const channel=this.peers.get(peerId)?.channel;if(channel?.readyState==='open')channel.send(JSON.stringify(message))}
+  broadcast(message:WireMessage){for(const peerId of this.peers.keys())this.send(peerId,message)}
+  close(){for(const{pc}of this.peers.values())pc.close();this.peers.clear()}
+}
+
+export class JoinNetwork{
+  pc=new RTCPeerConnection(config);channel:RTCDataChannel|null=null;
+  constructor(private onMessage:(message:WireMessage)=>void,private onStatus:(connected:boolean)=>void){this.pc.ondatachannel=event=>{this.channel=event.channel;this.channel.onopen=()=>this.onStatus(true);this.channel.onclose=()=>this.onStatus(false);this.channel.onmessage=e=>{try{this.onMessage(JSON.parse(e.data) as WireMessage)}catch{}}}}
+  async createAnswer(offer:string){await this.pc.setRemoteDescription(unpack(offer));await this.pc.setLocalDescription(await this.pc.createAnswer());await waitForIce(this.pc);return pack(this.pc.localDescription!)}
+  send(message:WireMessage){if(this.channel?.readyState==='open')this.channel.send(JSON.stringify(message))}
+  close(){this.pc.close()}
+}
