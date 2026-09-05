@@ -46,3 +46,9 @@ export function buildQuestionDeck(items:QuestionPair[],balanceCategories=false):
   while([...queues.values()].some(queue=>queue.length))for(const category of categories){const question=queues.get(category)?.shift();if(question)deck.push(question.id)}
   return deck;
 }
+export function prepareQuestionCycle(items:QuestionPair[],usedIds:number[]):{items:QuestionPair[];usedIds:number[]}{
+  const used=new Set(usedIds),unused=items.filter(question=>!used.has(question.id));
+  if(unused.length)return{items:unused,usedIds};
+  const poolIds=new Set(items.map(question=>question.id));
+  return{items,usedIds:usedIds.filter(id=>!poolIds.has(id))};
+}
