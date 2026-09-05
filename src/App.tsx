@@ -17,7 +17,7 @@ const PLAYER_ID_KEY='inne-pytanie:player-id';
 
 function readStorage<T>(key:string):T|null{try{return JSON.parse(localStorage.getItem(key)??'null') as T|null}catch{return null}}
 function getPlayerId(){const saved=localStorage.getItem(PLAYER_ID_KEY);if(saved)return saved;const id=crypto.randomUUID();localStorage.setItem(PLAYER_ID_KEY,id);return id}
-function publicRound(round:Round){return{...round,pair:{...round.pair,questionB:''},alternateId:'',votes:{}}}
+function publicRound(round:Round){return{...round,pair:{...round.pair,questionB:'',hintB:''},alternateId:'',votes:{}}}
 function useCountdown(deadline:number|undefined,active:boolean){const[remaining,setRemaining]=useState(0);useEffect(()=>{if(!deadline||!active){setRemaining(0);return}const tick=()=>setRemaining(Math.max(0,Math.ceil((deadline-Date.now())/1000)));tick();const timer=window.setInterval(tick,250);return()=>window.clearInterval(timer)},[deadline,active]);return remaining}
 function NumberSetting({label,value,min,max,fallback,onCommit}:{label:string;value:number;min:number;max:number;fallback:number;onCommit:(value:number)=>void}){const[draft,setDraft]=useState(String(value));useEffect(()=>setDraft(String(value)),[value]);const commit=()=>{const next=normalizeNumberSetting(draft,min,max,fallback);setDraft(String(next));onCommit(next)};return <label>{label}<input type="number" min={min} max={max} value={draft} onChange={event=>setDraft(event.target.value)} onBlur={commit}/></label>}
 function Shell({children}:{children:React.ReactNode}){return <main><header><b>≠</b> Inne pytanie</header>{children}</main>}
