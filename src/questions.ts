@@ -1,4 +1,5 @@
 export type Category='CS2'|'Gry'|'Samochody'|'Jedzenie'|'Zwierzęta'|'Codzienne'|'Internet'|'Losowe';
+export type CategoryFilter=Category|'Wszystkie';
 export interface QuestionPair{id:number;questionA:string;questionB:string;category:Category}
 const pairs:Array<[Category,string,string]>=[
 ['CS2','Jaka jest twoja ulubiona mapa w CS2?','Jaka jest najgorsza mapa w CS2?'],['CS2','Jaką broń kupujesz najczęściej?','Jaką broń najczęściej podnosisz po przeciwniku?'],['CS2','Ile fragów to dla ciebie dobry mecz?','Ile fragów zwykle robisz?'],['CS2','Którą mapę znasz najlepiej?','Na której mapie najczęściej się gubisz?'],['CS2','Jaka broń najlepiej wygląda?','Jaka broń najlepiej brzmi?'],
@@ -15,5 +16,5 @@ const pairs:Array<[Category,string,string]>=[
 ['Internet','Jakiej aplikacji używasz najczęściej?','Którą aplikację najchętniej byś usunął?'],['Internet','Kogo najchętniej oglądasz w internecie?','Z kim chciałbyś nagrać film?'],['Internet','Jaki mem zawsze cię śmieszy?','Jaki mem znudził ci się najbardziej?'],['Internet','Ile czasu spędzasz dziennie online?','Ile czasu wytrzymasz bez internetu?'],['Internet','Co najczęściej wyszukujesz?','Czego nigdy nie wpisałbyś publicznie?'],
 ['Losowe','Co zabrałbyś na bezludną wyspę?','Co zabrałbyś na koniec świata?'],['Losowe','Jaki superpower chciałbyś mieć?','Jaki superpower byłby najbardziej bezużyteczny?'],['Losowe','Gdzie chciałbyś mieszkać?','Gdzie chciałbyś pojechać tylko raz?'],['Losowe','Co kupiłbyś za milion złotych?','Co kupiłbyś za ostatnie sto złotych?'],['Losowe','Kim chciałeś zostać jako dziecko?','Kim chciałbyś być przez jeden dzień?']];
 export const QUESTIONS:QuestionPair[]=pairs.map(([category,questionA,questionB],index)=>({id:index+1,category,questionA,questionB}));
-export const CATEGORIES:Category[]=['CS2','Gry','Samochody','Jedzenie','Zwierzęta','Codzienne','Internet','Losowe'];
+export const CATEGORIES:CategoryFilter[]=['Wszystkie','CS2','Gry','Samochody','Jedzenie','Zwierzęta','Codzienne','Internet','Losowe'];
 export function shuffle<T>(items:T[]):T[]{const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}return result}
