@@ -1,4 +1,4 @@
-export type Category='CS2'|'Gry'|'Samochody'|'Jedzenie'|'Zwierzęta'|'Codzienne'|'Internet'|'Losowe'|'Kreatywne';
+export type Category='CS2'|'Gry'|'Samochody'|'Jedzenie'|'Zwierzęta'|'Codzienne'|'Internet'|'Losowe'|'Sport'|'Kreatywne';
 export type CategoryFilter=Category|'Wszystkie';
 export interface QuestionPair{id:number;questionA:string;questionB:string;category:Category;hintA?:string;hintB?:string}
 const pairs:Array<[Category,string,string,string?,string?]>=[
@@ -34,9 +34,18 @@ const pairs:Array<[Category,string,string,string?,string?]>=[
 ['Kreatywne','Narysuj potwora, który jest przyjazny.','Narysuj uroczego kosmitę.','Dodaj straszny wygląd i jeden sympatyczny szczegół.','Dodaj nietypowe oczy, czułki albo sposób poruszania.'],
 ['Kreatywne','Narysuj nietypowy środek transportu do szkoły.','Narysuj nietypowy środek transportu na wakacje.','Pomyśl o szybkim starcie i miejscu na plecak.','Pomyśl o bagażu, wygodzie i dalekiej podróży.'],
 ['Kreatywne','Narysuj sklep sprzedający marzenia.','Narysuj sklep sprzedający wspomnienia.','Pokaż, jak wyglądają marzenia na półkach.','Pokaż, w czym przechowuje się wspomnienia.'],
-['Kreatywne','Narysuj urządzenie do rozmowy ze zwierzętami.','Narysuj urządzenie do rozmowy z roślinami.','Dodaj mikrofon, tłumacz lub ekran z odpowiedzią.','Pokaż, jak roślina przekazuje swoją wiadomość.']];
+['Kreatywne','Narysuj urządzenie do rozmowy ze zwierzętami.','Narysuj urządzenie do rozmowy z roślinami.','Dodaj mikrofon, tłumacz lub ekran z odpowiedzią.','Pokaż, jak roślina przekazuje swoją wiadomość.'],
+['Sport','Jaki sport najbardziej lubisz oglądać?','Jaki sport najbardziej lubisz uprawiać?'],['Sport','Który piłkarz jest twoim ulubionym?','Który piłkarz jest najbardziej przereklamowany?'],['Sport','Jaki klub piłkarski ma najlepszych kibiców?','Jaki klub piłkarski ma najładniejsze stroje?'],['Sport','Która reprezentacja wygra najbliższy wielki turniej?','Której reprezentacji najbardziej lubisz kibicować?'],['Sport','Jaki wynik meczu piłkarskiego jest najciekawszy?','Jaki wynik meczu piłkarskiego jest najbardziej bolesny?'],
+['Sport','Który sportowiec jest największą legendą?','Z którym sportowcem chciałbyś porozmawiać?'],['Sport','Jaka dyscyplina wymaga najlepszej kondycji?','Jaka dyscyplina wymaga największej precyzji?'],['Sport','Który sport jest najtrudniejszy do nauczenia?','Który sport najłatwiej zacząć uprawiać?'],['Sport','Ile razy w tygodniu warto trenować?','Ile minut powinien trwać dobry trening?'],['Sport','Co najlepiej motywuje do treningu?','Co najczęściej zniechęca do treningu?'],
+['Sport','Jaka pora dnia jest najlepsza na trening?','Jaka pogoda jest najlepsza do treningu na zewnątrz?'],['Sport','Które ćwiczenie najbardziej lubisz?','Którego ćwiczenia najbardziej nie lubisz?'],['Sport','Jaki sport najlepiej uprawiać latem?','Jaki sport najlepiej uprawiać zimą?'],['Sport','Która dyscyplina olimpijska jest najciekawsza?','Jakiej dyscypliny brakuje na igrzyskach?'],['Sport','Jaki sport ekstremalny chciałbyś spróbować?','Jakiego sportu ekstremalnego nigdy byś nie spróbował?'],
+['Sport','Na jaki mecz chciałbyś dostać bilet?','Na jakie zawody chciałbyś pojechać jako kibic?'],['Sport','Jaki stadion robi największe wrażenie?','Na jakim stadionie chciałbyś zagrać?'],['Sport','Który sport najlepiej nadaje się do gry ze znajomymi?','Który sport najlepiej uprawiać samemu?'],['Sport','Co jest ważniejsze w sporcie: talent czy trening?','Co jest ważniejsze w drużynie: atak czy obrona?'],['Sport','Jaki moment sportowy pamiętasz najlepiej?','Jakie sportowe zwycięstwo chciałbyś zobaczyć na żywo?']];
 export const QUESTIONS:QuestionPair[]=pairs.map(([category,questionA,questionB,hintA,hintB],index)=>({id:index+1,category,questionA,questionB,hintA,hintB}));
-export const CATEGORIES:CategoryFilter[]=['Wszystkie','CS2','Gry','Samochody','Jedzenie','Zwierzęta','Codzienne','Internet','Losowe','Kreatywne'];
+export const CATEGORIES:CategoryFilter[]=['Wszystkie','CS2','Gry','Samochody','Jedzenie','Zwierzęta','Codzienne','Internet','Losowe','Sport','Kreatywne'];
+export function toggleCategory(current:CategoryFilter[],category:CategoryFilter):CategoryFilter[]{
+  if(category==='Wszystkie')return current.length===1&&current[0]==='Wszystkie'?[]:['Wszystkie'];
+  const specific=current.filter(value=>value!=='Wszystkie');
+  return specific.includes(category)?specific.filter(value=>value!==category):[...specific,category];
+}
 export function shuffle<T>(items:T[]):T[]{const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}return result}
 export function buildQuestionDeck(items:QuestionPair[],balanceCategories=false):number[]{
   if(!balanceCategories)return shuffle(items.map(question=>question.id));
