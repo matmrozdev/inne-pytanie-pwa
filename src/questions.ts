@@ -38,3 +38,11 @@ const pairs:Array<[Category,string,string,string?,string?]>=[
 export const QUESTIONS:QuestionPair[]=pairs.map(([category,questionA,questionB,hintA,hintB],index)=>({id:index+1,category,questionA,questionB,hintA,hintB}));
 export const CATEGORIES:CategoryFilter[]=['Wszystkie','CS2','Gry','Samochody','Jedzenie','Zwierzęta','Codzienne','Internet','Losowe','Kreatywne'];
 export function shuffle<T>(items:T[]):T[]{const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}return result}
+export function buildQuestionDeck(items:QuestionPair[],balanceCategories=false):number[]{
+  if(!balanceCategories)return shuffle(items.map(question=>question.id));
+  const groups=new Map<Category,QuestionPair[]>();
+  for(const question of items)groups.set(question.category,[...(groups.get(question.category)??[]),question]);
+  const categories=shuffle([...groups.keys()]),queues=new Map(categories.map(category=>[category,shuffle(groups.get(category)??[])])),deck:number[]=[];
+  while([...queues.values()].some(queue=>queue.length))for(const category of categories){const question=queues.get(category)?.shift();if(question)deck.push(question.id)}
+  return deck;
+}
