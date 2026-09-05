@@ -5,7 +5,7 @@ export function normalizeNumberSetting(value:string,min:number,max:number,fallba
   return Number.isFinite(parsed)?Math.max(min,Math.min(max,Math.trunc(parsed))):fallback;
 }
 
-export function shouldRevealRound(deadline:number,now=Date.now()):boolean{return now>=deadline}
+export function shouldRevealRound(deadline:number,allPlayersReady:boolean,now=Date.now()):boolean{return allPlayersReady||now>=deadline}
 
 export function scoreVotes<T extends ScorePlayer>(players:T[],impostorId:string,votes:Record<string,string>):T[]{
   const voteCount=Object.values(votes).reduce<Record<string,number>>((counts,id)=>({...counts,[id]:(counts[id]??0)+1}),{});
