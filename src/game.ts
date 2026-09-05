@@ -7,6 +7,12 @@ export function normalizeNumberSetting(value:string,min:number,max:number,fallba
 
 export function shouldRevealRound(deadline:number,allPlayersReady:boolean,now=Date.now()):boolean{return allPlayersReady||now>=deadline}
 
+export function shouldAcceptRoundMessage(currentNumber:number,currentDeadline:number,incomingNumber:number,incomingDeadline:number):boolean{
+  if(currentNumber===0)return true;
+  if(incomingNumber===1&&incomingDeadline>currentDeadline)return true;
+  return incomingNumber>currentNumber;
+}
+
 export function scoreVotes<T extends ScorePlayer>(players:T[],impostorId:string,votes:Record<string,string>):T[]{
   const voteCount=Object.values(votes).reduce<Record<string,number>>((counts,id)=>({...counts,[id]:(counts[id]??0)+1}),{});
   const impostorEscaped=(voteCount[impostorId]??0)<=Object.keys(votes).length/2;
