@@ -9,7 +9,7 @@ export class HostNetwork{
   constructor(private onMessage:(peerId:string,message:WireMessage)=>void,private onStatus:(peerId:string,connected:boolean)=>void){}
   async createOffer(){const peerId=crypto.randomUUID();const pc=new RTCPeerConnection(config);const channel=pc.createDataChannel('game',{ordered:true});this.bind(peerId,pc,channel);await pc.setLocalDescription(await pc.createOffer());await waitForIce(pc);this.peers.set(peerId,{pc,channel});return{peerId,offer:pack(pc.localDescription!)}}
   async acceptAnswer(peerId:string,answer:string){const peer=this.peers.get(peerId);if(!peer)throw new Error('Nie znaleziono zaproszenia.');await peer.pc.setRemoteDescription(unpack(answer))}
-  bind(peerId:string,pc:RTCPeerConnection,channel:RTCDataChannel){channel.onopen=()=>this.onStatus(peerId,true);channel.onclose=()=>this.onStatus(peerId,false);channel.onmessage=event=>{try{this.onMessage(peerId,JSON.parse(event.data) as WireMessage)}catch{}}}
+  bind(peerId:string,pc:RTCPeerConnection,channel:RTCDataChannel){channel.onopen=()=>this.onStatus(peerId,true);channel.onclose=()=>this.onStatus(peerId,false);channel.onmessage=event=>{try{const message=JSON.parse(event.data) as WireMessage;this.onMessage(peerId,message);if(message.type==='join')this.send(peerId,{type:'join_ack'})}catch{}}}
   send(peerId:string,message:WireMessage){const channel=this.peers.get(peerId)?.channel;if(channel?.readyState==='open')channel.send(JSON.stringify(message))}
   broadcast(message:WireMessage){for(const peerId of this.peers.keys())this.send(peerId,message)}
   close(){for(const{pc}of this.peers.values())pc.close();this.peers.clear()}
@@ -17,8 +17,10 @@ export class HostNetwork{
 
 export class JoinNetwork{
   pc=new RTCPeerConnection(config);channel:RTCDataChannel|null=null;
-  constructor(private onMessage:(message:WireMessage)=>void,private onStatus:(connected:boolean)=>void){this.pc.ondatachannel=event=>{this.channel=event.channel;this.channel.onopen=()=>this.onStatus(true);this.channel.onclose=()=>this.onStatus(false);this.channel.onmessage=e=>{try{this.onMessage(JSON.parse(e.data) as WireMessage)}catch{}}}}
+  private joinRetryTimers:ReturnType<typeof setTimeout>[]=[];
+  constructor(private onMessage:(message:WireMessage)=>void,private onStatus:(connected:boolean)=>void,private onOpen:()=>void){this.pc.ondatachannel=event=>{this.channel=event.channel;this.channel.onopen=()=>this.onOpen();this.channel.onclose=()=>{this.clearJoinRetries();this.onStatus(false)};this.channel.onmessage=e=>{try{const message=JSON.parse(e.data) as WireMessage;if(message.type==='join_ack'){this.clearJoinRetries();this.onStatus(true);return}this.onMessage(message)}catch{}}}}
   async createAnswer(offer:string){await this.pc.setRemoteDescription(unpack(offer));await this.pc.setLocalDescription(await this.pc.createAnswer());await waitForIce(this.pc);return pack(this.pc.localDescription!)}
-  send(message:WireMessage){if(this.channel?.readyState==='open')this.channel.send(JSON.stringify(message))}
-  close(){this.pc.close()}
+  private clearJoinRetries(){for(const timer of this.joinRetryTimers)clearTimeout(timer);this.joinRetryTimers=[]}
+  send(message:WireMessage){if(this.channel?.readyState==='open')this.channel.send(JSON.stringify(message));if(message.type==='join'){this.clearJoinRetries();for(const delay of[250,750,1500,2500])this.joinRetryTimers.push(setTimeout(()=>{if(this.channel?.readyState==='open')this.channel.send(JSON.stringify(message))},delay))}}
+  close(){this.clearJoinRetries();this.channel?.close();this.pc.close()}
 }
